@@ -53,3 +53,21 @@ export function subscribeWeekPlan(
 export async function saveWeekPlan(id: string, plan: WeekPlan) {
   await setDoc(doc(weeksCol(), id), { plan }, { merge: true })
 }
+
+export interface StoredWeek {
+  id: string // the ISO date of the week's Monday
+  plan: Partial<WeekPlan>
+}
+
+// Every saved week plan, used to compute meal statistics. Fine to load wholesale
+// for a household-sized app (a handful of small docs per year).
+export function subscribeAllWeeks(onChange: (weeks: StoredWeek[]) => void) {
+  return onSnapshot(weeksCol(), (snap) => {
+    onChange(
+      snap.docs.map((d) => ({
+        id: d.id,
+        plan: (d.data().plan ?? {}) as Partial<WeekPlan>,
+      })),
+    )
+  })
+}

@@ -70,15 +70,12 @@ export function WeekView({ onEditWeek }: { onEditWeek: (date: Date) => void }) {
                     : 'border-slate-800 bg-slate-800/50 hover:border-slate-700'
                 } ${isPast ? 'opacity-50' : ''}`}
               >
-                <span className="flex w-24 shrink-0 items-center gap-2">
-                  <span className={isToday ? 'text-white' : 'text-slate-300'}>
-                    {day}
-                  </span>
-                  {isToday && (
-                    <span className="rounded bg-indigo-400 px-1.5 py-0.5 text-[10px] font-semibold text-slate-900">
-                      TODAY
-                    </span>
-                  )}
+                <span
+                  className={`w-24 shrink-0 ${
+                    isToday ? 'font-medium text-white' : 'text-slate-300'
+                  }`}
+                >
+                  {day}
                 </span>
                 <span
                   className={`flex-1 ${name ? 'text-white' : 'text-slate-500'}`}

@@ -1,12 +1,24 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Meal } from '../types'
-import { addMeal, deleteMeal, subscribeMeals } from '../lib/meals'
+import {
+  addMeal,
+  deleteMeal,
+  subscribeAllWeeks,
+  subscribeMeals,
+  type StoredWeek,
+} from '../lib/meals'
+import { computeMealStats, formatLastEaten } from '../lib/stats'
 
 export function Meals() {
+  const today = useMemo(() => new Date(), [])
   const [meals, setMeals] = useState<Meal[]>([])
+  const [weeks, setWeeks] = useState<StoredWeek[]>([])
   const [name, setName] = useState('')
 
   useEffect(() => subscribeMeals(setMeals), [])
+  useEffect(() => subscribeAllWeeks(setWeeks), [])
+
+  const stats = useMemo(() => computeMealStats(weeks, today), [weeks, today])
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,20 +51,35 @@ export function Meals() {
         </p>
       ) : (
         <ul className="divide-y divide-slate-800 overflow-hidden rounded-lg border border-slate-800">
-          {meals.map((meal) => (
-            <li
-              key={meal.id}
-              className="flex items-center justify-between bg-slate-800/50 px-4 py-3"
-            >
-              <span className="text-white">{meal.name}</span>
-              <button
-                onClick={() => deleteMeal(meal.id)}
-                className="text-sm text-slate-500 transition hover:text-red-400"
+          {meals.map((meal) => {
+            const stat = stats.get(meal.id)
+            return (
+              <li
+                key={meal.id}
+                className="flex items-center justify-between gap-3 bg-slate-800/50 px-4 py-3"
               >
-                Delete
-              </button>
-            </li>
-          ))}
+                <div className="min-w-0">
+                  <div className="truncate text-white">{meal.name}</div>
+                  <div className="mt-0.5 text-xs text-slate-500">
+                    {stat
+                      ? `Eaten ${stat.count} ${
+                          stat.count === 1 ? 'time' : 'times'
+                        } · last ${formatLastEaten(
+                          stat.lastEaten!,
+                          today,
+                        )}`
+                      : 'Not eaten yet'}
+                  </div>
+                </div>
+                <button
+                  onClick={() => deleteMeal(meal.id)}
+                  className="shrink-0 text-sm text-slate-500 transition hover:text-red-400"
+                >
+                  Delete
+                </button>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>
