@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Lock the whole app to a known set of accounts (you + your wife).
+    // Add each Google account email to this list.
+    function isAllowed() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'stuart.wem@gmail.com',
+          'az.llorens@gmail.com'
+        ];
+    }
+
+    match /meals/{mealId} {
+      allow read, write: if isAllowed();
+    }
+
+    match /weeks/{weekId} {
+      allow read, write: if isAllowed();
+    }
+  }
+}
