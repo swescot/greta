@@ -4,13 +4,21 @@ import { DAYS, emptyWeekPlan } from '../types'
 import { saveWeekPlan, subscribeMeals, subscribeWeekPlan } from '../lib/meals'
 import { addWeeks, formatWeekRange, weekId } from '../lib/week'
 
-export function WeekPlanner() {
-  const [offset, setOffset] = useState(0)
+export function WeekPlanner({
+  date,
+  onNavigate,
+}: {
+  date: Date
+  onNavigate: (date: Date) => void
+}) {
   const [meals, setMeals] = useState<Meal[]>([])
   const [plan, setPlan] = useState<WeekPlan>(emptyWeekPlan())
 
-  const date = useMemo(() => addWeeks(new Date(), offset), [offset])
   const id = useMemo(() => weekId(date), [date])
+  const isCurrentWeek = useMemo(
+    () => weekId(new Date()) === id,
+    [id],
+  )
 
   useEffect(() => subscribeMeals(setMeals), [])
   useEffect(() => subscribeWeekPlan(id, setPlan), [id])
@@ -25,19 +33,19 @@ export function WeekPlanner() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <button
-          onClick={() => setOffset((o) => o - 1)}
+          onClick={() => onNavigate(addWeeks(date, -1))}
           className="rounded-lg px-3 py-1 text-slate-400 transition hover:bg-slate-800 hover:text-white"
         >
           ‹ Prev
         </button>
         <div className="text-center">
           <div className="font-medium text-white">{formatWeekRange(date)}</div>
-          {offset === 0 && (
+          {isCurrentWeek && (
             <div className="text-xs text-indigo-400">This week</div>
           )}
         </div>
         <button
-          onClick={() => setOffset((o) => o + 1)}
+          onClick={() => onNavigate(addWeeks(date, 1))}
           className="rounded-lg px-3 py-1 text-slate-400 transition hover:bg-slate-800 hover:text-white"
         >
           Next ›

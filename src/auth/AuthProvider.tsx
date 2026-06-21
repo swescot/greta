@@ -5,13 +5,11 @@ import { AuthContext } from './AuthContext'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  // Only "loading" while we wait for Firebase to report its auth state.
+  const [loading, setLoading] = useState(!!auth)
 
   useEffect(() => {
-    if (!auth) {
-      setLoading(false)
-      return
-    }
+    if (!auth) return
     return onAuthStateChanged(auth, (u) => {
       setUser(u)
       setLoading(false)
